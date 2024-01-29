@@ -6,16 +6,20 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(vim.env.LAZY or lazypath)
 
+vim.g.nightflyNormalFloat = true
+
 require("lazy").setup({
   spec = {
+    { "bluz71/vim-nightfly-colors", name = "nightfly", lazy = false, priority = 1000 },
     -- add LazyVim and import its plugins
-    { "LazyVim/LazyVim", import = "lazyvim.plugins" },
+    { "LazyVim/LazyVim", import = "lazyvim.plugins", opts = { colorscheme = "nightfly" } },
     -- import any extras modules here
     -- { import = "lazyvim.plugins.extras.lang.typescript" },
     -- { import = "lazyvim.plugins.extras.lang.json" },
     -- { import = "lazyvim.plugins.extras.ui.mini-animate" },
     -- import/override with your plugins
     { import = "plugins" },
+    { import = "plugins.lang.cpp" },
   },
   defaults = {
     -- By default, only LazyVim plugins will be lazy-loaded. Your custom plugins will load during startup.
@@ -26,7 +30,8 @@ require("lazy").setup({
     version = false, -- always use the latest git commit
     -- version = "*", -- try installing the latest stable version for plugins that support semver
   },
-  install = { colorscheme = { "tokyonight", "habamax" } },
+  -- install = { colorscheme = { "tokyonight", "habamax" } },
+  -- install = { colorscheme = { "modus" } },
   checker = { enabled = false }, -- automatically check for plugin updates
   performance = {
     rtp = {
@@ -44,37 +49,3 @@ require("lazy").setup({
     },
   },
 })
-
-local dap = require("dap")
-
-dap.adapters.codelldb = {
-  type = "server",
-  host = "127.0.0.1",
-  port = 13000, -- 💀 Use the port printed out or specified with `--port`
-  executable = {
-    command = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/adapter/codelldb.exe",
-    args = { "--port", "13000" },
-    -- On windows you may have to uncomment this:
-    detached = false,
-  },
-}
-
-dap.configurations.cpp = {
-  {
-    name = "Launch file",
-    type = "codelldb",
-    request = "launch",
-    program = function()
-      return vim.fn.input({
-        prompt = "Path to executable: ",
-        default = vim.fn.getcwd() .. "/",
-        completion = "file",
-      })
-    end,
-    cwd = "${workspaceFolder}",
-    stopOnEntry = false,
-  },
-}
-
-dap.configurations.c = dap.configurations.cpp
-dap.configurations.rust = dap.configurations.cpp
